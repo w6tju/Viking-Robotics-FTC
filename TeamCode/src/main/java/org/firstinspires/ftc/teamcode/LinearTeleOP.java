@@ -54,7 +54,7 @@ public class LinearTeleOP extends LinearOpMode {
     int Arm_Pos = 0; //arm setpoint
     int Arm_increment = 3; //Angle (deg) the arm rotates by
     private boolean Intake_Active = false; //if intake is active or not (off by default)
-    double WHEEL_SPEED = 0.75; //Maximum wheel speed (used to slow down the robot)
+    double WHEEL_SPEED = 1; //Maximum wheel speed (used to slow down the robot)
 
     //Viper Slide configs
     int Viper_maxExtend = 0;
