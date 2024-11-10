@@ -54,13 +54,13 @@ public class LinearTeleOP extends LinearOpMode {
     int Arm_Pos = 0; //arm setpoint
     int Arm_increment = 3; //Angle (deg) the arm rotates by
     private boolean Intake_Active = false; //if intake is active or not (off by default)
-    double WHEEL_SPEED = 1; //Maximum wheel speed (used to slow down the robot)
+    double WHEEL_SPEED = 0.75; //Maximum wheel speed (used to slow down the robot)
 
     //Viper Slide configs
-    int Viper_maxExtend = 0;
-    int Viper_minExtend = 0;
-    int Viper_Increment = 1;
-    int Viper_Pos = 0;
+    int Viper_maxExtend = 0; //Maximum encoder tick on the viperslide extension
+    int Viper_minExtend = 0; //Minimum encoder tick on the viperslide extension
+    int Viper_Increment = 10; //Increment used by viperslide manual extension
+    int Viper_Pos = 0; //Current encoder tick position of the viperslide
 
     //Button toggles to prevent internal "button spam"
     boolean Dpad_UpPressed = false;
@@ -91,6 +91,8 @@ public class LinearTeleOP extends LinearOpMode {
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        viperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //Fixes issue where the arm is unresponsive for a period of time until setpoint reaches resting point\\
         Arm_Pos = armMotor.getCurrentPosition()+50;
 
@@ -162,7 +164,7 @@ public class LinearTeleOP extends LinearOpMode {
                 armMotor.setTargetPosition(Arm_Pos);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
-            ((DcMotorEx)viperSlide).setVelocity(100);
+            ((DcMotorEx)viperSlide).setVelocity(2100);
             viperSlide.setTargetPosition(Viper_Pos);
             viperSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
