@@ -127,8 +127,8 @@ public class LinearTeleOP extends LinearOpMode {
             if (gamepad1.left_bumper) {Arm_Pos = 1093;}
 
             //Arm Increment Control (Mainly to quick tune the arm movement)\\
-            if (gamepad1.dpad_up) {Viper_Pos+=Viper_Increment;}
-            if (gamepad1.dpad_down) {Viper_Pos-=Viper_Increment;}
+            if (gamepad1.dpad_up) {Viper_Pos-=Viper_Increment;}
+            if (gamepad1.dpad_down) {Viper_Pos+=Viper_Increment;}
 
             //Intake\\
             if (gamepad1.x && (!X_Pressed)) {
