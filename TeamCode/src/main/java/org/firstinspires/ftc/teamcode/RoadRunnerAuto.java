@@ -106,10 +106,10 @@ public class RoadRunnerAuto extends LinearOpMode {
         intake = hardwareMap.get(CRServo.class, "intake"); //CRservo defined as "intake" in driver hub
         viperSlide = hardwareMap.get(DcMotor.class,"viperSlide"); //Motor defined as "viperSlide" in driver hub
 
-        TrajectorySequence Move1 = Controller.trajectorySequenceBuilder(new Pose2d())
+        TrajectorySequence Move1 = Controller.trajectorySequenceBuilder((new Pose2d(60, -60, Math.toRadians(180))))
                 .splineTo(new Vector2d(0,-30),Math.toRadians(90))
                 .back(30)
-                .splineTo(new Vector2d(-48,-35),Math.toRadians(90))
+                //.splineTo(new Vector2d(-48,-35),Math.toRadians(90))
                 .build();
 
         waitForStart();
