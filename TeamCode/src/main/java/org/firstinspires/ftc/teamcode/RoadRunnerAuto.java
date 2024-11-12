@@ -53,12 +53,16 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+
+import java.util.List;
+import java.util.ResourceBundle;
 
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
@@ -103,57 +107,9 @@ public class RoadRunnerAuto extends LinearOpMode {
         viperSlide = hardwareMap.get(DcMotor.class,"viperSlide"); //Motor defined as "viperSlide" in driver hub
 
         TrajectorySequence Move1 = Controller.trajectorySequenceBuilder(new Pose2d())
-                .forward(26)
-                .waitSeconds(0)//TBD
-                //Inject Specimen Release
-                .addDisplacementMarker(() -> {
-                    Arm_Pos = 0; //High Rung Point
-                    intake.setPower(-1);
-                    Arm_Pos = 0; //HalfwayPoint
-                })
-                .back(10)
-                //Collect & Deposit Sample 1
-                .lineToLinearHeading(new Pose2d(0, 0, 0))
-                .addDisplacementMarker(() -> { //Collect Sample
-                    Arm_Pos = 0; //CollectionPoint
-                    intake.setPower(1);
-                    Viper_Pos = 0; //Viper Extension
-                })
-                .lineToLinearHeading(new Pose2d(0,0,0))
-                .addDisplacementMarker(()-> { //Deposit Sample
-                    Arm_Pos = 0; //ReleasePoint
-                    intake.setPower(1);
-                    Viper_Pos = 0; //Viper Extension
-                })
-                //Collect & Deposit Sample 2
-                .lineToLinearHeading(new Pose2d(0, 0, 0))
-                .addDisplacementMarker(() -> { //Collect Sample
-                    Arm_Pos = 0; //CollectionPoint
-                    intake.setPower(1);
-                    Viper_Pos = 0; //Viper Extension
-                })
-                .lineToLinearHeading(new Pose2d(0,0,0))
-                .addDisplacementMarker(()-> { //Deposit Sample
-                    Arm_Pos = 0; //ReleasePoint
-                    intake.setPower(1);
-                    Viper_Pos = 0; //Viper Extension
-                })
-                //Collect & Deposit Sample 3
-                .lineToLinearHeading(new Pose2d(0, 0, 0))
-                .addDisplacementMarker(() -> { //Collect Sample
-                    Arm_Pos = 0; //CollectionPoint
-                    intake.setPower(1);
-                    Viper_Pos = 0; //Viper Extension
-                })
-                .lineToLinearHeading(new Pose2d(0,0,0))
-                .addDisplacementMarker(()-> { //Deposit Sample
-                    Arm_Pos = 0; //ReleasePoint
-                    intake.setPower(1);
-                    Viper_Pos = 0; //Viper Extension
-                })
-
-                //Park in Observation Zone
-                .lineTo(new Vector2d(0,0))
+                .splineTo(new Vector2d(0,-30),Math.toRadians(90))
+                .back(30)
+                .splineTo(new Vector2d(-48,-35),Math.toRadians(90))
                 .build();
 
         waitForStart();
@@ -168,6 +124,14 @@ public class RoadRunnerAuto extends LinearOpMode {
             ((DcMotorEx)viperSlide).setVelocity(2100);
             viperSlide.setTargetPosition(Viper_Pos);
             viperSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            List<Double> WheelVelocities = Controller.getWheelVelocities();
+
+            telemetry.addData("Motor Velocities", "left (%.2f), right (%.2f)", WheelVelocities.get(0), WheelVelocities.get(1));
+            telemetry.addData("Arm Encoder Position",Arm_Pos);
+            telemetry.addData("Viperslide Encoder Position",Viper_Pos);
+            telemetry.addData("Estimated Position",Controller.getPoseEstimate());
+            telemetry.update();
         }
     }
 }
