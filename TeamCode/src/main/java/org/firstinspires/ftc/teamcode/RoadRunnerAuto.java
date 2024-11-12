@@ -109,7 +109,7 @@ public class RoadRunnerAuto extends LinearOpMode {
         TrajectorySequence Move1 = Controller.trajectorySequenceBuilder((new Pose2d(60, -60, Math.toRadians(180))))
                 .splineTo(new Vector2d(0,-30),Math.toRadians(90))
                 .back(30)
-                //.splineTo(new Vector2d(-48,-35),Math.toRadians(90))
+                .splineTo(new Vector2d(-48,-35),Math.toRadians(90))
                 .build();
 
         waitForStart();
