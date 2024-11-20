@@ -37,6 +37,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.FtcDashboard;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -69,6 +73,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Autonomous()
 public class LinearAuto extends LinearOpMode {
+    //Hybrid Telemetry
+    Telemetry Telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
     /* Declare OpMode members. */
     private DcMotor         leftDrive   = null;
@@ -200,10 +206,10 @@ public class LinearAuto extends LinearOpMode {
                 armMotor.setTargetPosition(Run_To+100);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d", newLeftTarget,  newRightTarget);
-                telemetry.addData("Currently at",  " at %7d :%7d",
+                Telemetry.addData("Running to",  " %7d :%7d", newLeftTarget,  newRightTarget);
+                Telemetry.addData("Currently at",  " at %7d :%7d",
                                             leftDrive.getCurrentPosition(), rightDrive.getCurrentPosition());
-                telemetry.update();
+                Telemetry.update();
             }
 
             // Stop all motion;

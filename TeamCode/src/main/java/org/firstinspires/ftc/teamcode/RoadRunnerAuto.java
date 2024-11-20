@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.drive.DriveSignal;
@@ -60,6 +61,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -125,12 +127,12 @@ public class RoadRunnerAuto extends LinearOpMode {
             viperSlide.setTargetPosition(Viper_Pos);
             viperSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            List<Double> WheelVelocities = Controller.getWheelVelocities();
+            //List<Double> WheelVelocities = Controller.getWheelVelocities();
 
-            telemetry.addData("Motor Velocities", "left (%.2f), right (%.2f)", WheelVelocities.get(0), WheelVelocities.get(1));
+            //telemetry.addData("Motor Velocities", "left (%.2f), right (%.2f)", WheelVelocities.get(0), WheelVelocities.get(1));
             telemetry.addData("Arm Encoder Position",Arm_Pos);
             telemetry.addData("Viperslide Encoder Position",Viper_Pos);
-            telemetry.addData("Estimated Position",Controller.getPoseEstimate());
+            //telemetry.addData("Estimated Position",Controller.getPoseEstimate());
             telemetry.update();
         }
     }

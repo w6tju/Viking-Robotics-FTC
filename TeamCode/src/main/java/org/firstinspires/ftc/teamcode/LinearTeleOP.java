@@ -29,37 +29,44 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @TeleOp()
 
 public class LinearTeleOP extends LinearOpMode {
-    
+
+    //Hybrid Telemetry
+    //Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
     // Declare OpMode members.
     ElapsedTime runtime = new ElapsedTime();
     DcMotor leftDrive; //left side motor
     DcMotor rightDrive; //right side motor
     DcMotor armMotor; //motor in arm tower
     DcMotor viperSlide; //Motor that runs viperslide
-    CRServo intake; //intake motor
-    Servo wrist; //wrist servo
+    Servo wrist;
+    CRServo intake_Left; //intake motor
+    CRServo intake_Right; //intake motor
     int Arm_Pos = 0; //arm setpoint
     int Arm_increment = 3; //Angle (deg) the arm rotates by
-    private boolean Intake_Active = false; //if intake is active or not (off by default)
-    double WHEEL_SPEED = 0.75; //Maximum wheel speed (used to slow down the robot)
+    private int Intake_Active = 3; //if intake is active or not (off by default)
+    double WHEEL_SPEED = 0.7; //Maximum wheel speed (used to slow down the robot)
 
     //Viper Slide configs
-    int Viper_maxExtend = 0; //Maximum encoder tick on the viperslide extension
+    int Viper_maxExtend = 5000; //Maximum encoder tick on the viperslide extension
     int Viper_minExtend = 0; //Minimum encoder tick on the viperslide extension
-    int Viper_Increment = 10; //Increment used by viperslide manual extension
+    int Viper_Increment = 7; //Increment used by viperslide manual extension
     int Viper_Pos = 0; //Current encoder tick position of the viperslide
 
     //Button toggles to prevent internal "button spam"
@@ -70,22 +77,31 @@ public class LinearTeleOP extends LinearOpMode {
     //Auto hang toggle\\
     boolean Hang_Mode = false;
 
+    //Variables to handle Viperslide Limiting
+    final double Counts_PerViperRev = 537.7; //Counts of the encoder per revolution of the motor
+    final double Distance_PerViperRev = 4.72441; //Length Added by Viperslide per revolution in inches
+    final double RobotLength = 18.5; //Robot length in inches
+    final double Arm_Length = 0; //Length of arm fully retracted in inches
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        
+
         //Set motors\\
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive"); //Motor defined as "left_drive" in driver hub
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive"); //Motor defined as "right_drive" in driver hub
         armMotor = hardwareMap.get(DcMotor.class, "armMotor"); //Motor defined as "armMotor" in driver hub
-        intake = hardwareMap.get(CRServo.class, "intake"); //CRservo defined as "intake" in driver hub
+        intake_Left = hardwareMap.get(CRServo.class, "intake_Left"); //CRservo defined as "intake" in driver hub
+        intake_Right = hardwareMap.get(CRServo.class, "intake_Right"); //CRservo defined as "intake" in driver hub
         viperSlide = hardwareMap.get(DcMotor.class,"viperSlide"); //Motor defined as "viperSlide" in driver hub
+        wrist = hardwareMap.get(Servo.class, "wrist");
 
         //Define Direction behavior (makes it easier to code movement as you do not have to manually account for it in your code)\\;
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-        
+        viperSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+
         //Define behavior of motors with no input\\
         leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -103,11 +119,11 @@ public class LinearTeleOP extends LinearOpMode {
 
         //Main loop (runs as long as you are in op mode)\\
         while (opModeIsActive()) {
-            
+
             //define power variables for drive motors\\
             double leftPower;
             double rightPower;
-            
+
             //Differential (tank) steering code\\
             double drive;
             if (Hang_Mode) {drive = 1; } else {drive = -gamepad1.left_stick_y*WHEEL_SPEED; }
@@ -115,15 +131,15 @@ public class LinearTeleOP extends LinearOpMode {
 
             leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
             rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
-            
+
             //Send power (maxRPM_AtV*Power) to motor\\
             leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);   
-            
+            rightDrive.setPower(rightPower);
+
             //Arm movement Pt. 1 angle setpoint\\
             if (gamepad1.left_trigger > 0){Arm_Pos -= Arm_increment;}
             if (gamepad1.right_trigger > 0){Arm_Pos += Arm_increment;}
-            if (gamepad1.right_bumper) {Arm_Pos = 1870;}
+            if (gamepad1.right_bumper) {Arm_Pos = 1835;}
             if (gamepad1.left_bumper) {Arm_Pos = 1093;}
 
             //Arm Increment Control (Mainly to quick tune the arm movement)\\
@@ -134,15 +150,25 @@ public class LinearTeleOP extends LinearOpMode {
             if (gamepad1.x && (!X_Pressed)) {
                 X_Pressed = true;
                 //if intake is inactive, activate intake\\
-                if (!Intake_Active) {
-                    Intake_Active = true;
-                    intake.setPower(1);
+                if (Intake_Active == 3) {
+                    Intake_Active = 1;
+                    intake_Left.setPower(1);
+                    intake_Right.setPower(-1);
                 }
                 //if intake is active, deactivate intake\\
                 else {
-                    intake.setPower(-1);
-                    Intake_Active = false;
+                    if (Intake_Active == 1) {
+                        intake_Left.setPower(0);
+                        intake_Right.setPower(0);
+                        Intake_Active = 2;
                     }
+                    else {
+                        if (Intake_Active == 2) {
+                            intake_Left.setPower(-1);
+                            intake_Right.setPower(1);
+                            Intake_Active = 3;
+                        }
+                    }}
             }
             if (!gamepad1.x && X_Pressed) {X_Pressed = false;}
 
@@ -164,6 +190,9 @@ public class LinearTeleOP extends LinearOpMode {
                 armMotor.setTargetPosition(Arm_Pos);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
+
+            if (Viper_Pos > Viper_maxExtend) {Viper_Pos = Viper_maxExtend;}
+            if (Viper_Pos < Viper_minExtend) {Viper_Pos = Viper_minExtend;}
             ((DcMotorEx)viperSlide).setVelocity(2100);
             viperSlide.setTargetPosition(Viper_Pos);
             viperSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -175,12 +204,12 @@ public class LinearTeleOP extends LinearOpMode {
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.addData("Arm",Arm_Pos);
             telemetry.addData("ViperSlide",Viper_Pos);
-            if (!Intake_Active) {
+            /*if (!Intake_Active) {
                telemetry.addData("Intake", "Intaking");
             }
             else {
               telemetry.addData("Intake","Ejecting");
-            }
+            }*/
             telemetry.update();
         }
     }
