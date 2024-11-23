@@ -60,13 +60,13 @@ public class LinearTeleOP extends LinearOpMode {
     CRServo intake_Right; //intake motor
     int Arm_Pos = 0; //arm setpoint
     int Arm_increment = 3; //Angle (deg) the arm rotates by
-    private int Intake_Active = 3; //if intake is active or not (off by default)
+    private boolean Intake_Active = false; //if intake is active or not (off by default)
     double WHEEL_SPEED = 0.7; //Maximum wheel speed (used to slow down the robot)
 
     //Viper Slide configs
-    int Viper_maxExtend = 5000; //Maximum encoder tick on the viperslide extension
+    int Viper_maxExtend = 5300; //Maximum encoder tick on the viperslide extension
     int Viper_minExtend = 0; //Minimum encoder tick on the viperslide extension
-    int Viper_Increment = 7; //Increment used by viperslide manual extension
+    int Viper_Increment = 30; //Increment used by viperslide manual extension
     int Viper_Pos = 0; //Current encoder tick position of the viperslide
 
     //Button toggles to prevent internal "button spam"
@@ -83,6 +83,9 @@ public class LinearTeleOP extends LinearOpMode {
     final double RobotLength = 18.5; //Robot length in inches
     final double Arm_Length = 0; //Length of arm fully retracted in inches
 
+    //Arm Limiting
+    final int Min_Arm = 0;
+    final int Max_Arm = 900;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -93,9 +96,9 @@ public class LinearTeleOP extends LinearOpMode {
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive"); //Motor defined as "right_drive" in driver hub
         armMotor = hardwareMap.get(DcMotor.class, "armMotor"); //Motor defined as "armMotor" in driver hub
         intake_Left = hardwareMap.get(CRServo.class, "intake_Left"); //CRservo defined as "intake" in driver hub
-        intake_Right = hardwareMap.get(CRServo.class, "intake_Right"); //CRservo defined as "intake" in driver hub
+        //intake_Right = hardwareMap.get(CRServo.class, "intake_Right"); //CRservo defined as "intake" in driver hub
         viperSlide = hardwareMap.get(DcMotor.class,"viperSlide"); //Motor defined as "viperSlide" in driver hub
-        wrist = hardwareMap.get(Servo.class, "wrist");
+        //wrist = hardwareMap.get(Servo.class, "wrist");
 
         //Define Direction behavior (makes it easier to code movement as you do not have to manually account for it in your code)\\;
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -116,10 +119,8 @@ public class LinearTeleOP extends LinearOpMode {
         //waits for start button on driver hub\\
         waitForStart();
         runtime.reset();
-
         //Main loop (runs as long as you are in op mode)\\
         while (opModeIsActive()) {
-
             //define power variables for drive motors\\
             double leftPower;
             double rightPower;
@@ -139,8 +140,8 @@ public class LinearTeleOP extends LinearOpMode {
             //Arm movement Pt. 1 angle setpoint\\
             if (gamepad1.left_trigger > 0){Arm_Pos -= Arm_increment;}
             if (gamepad1.right_trigger > 0){Arm_Pos += Arm_increment;}
-            if (gamepad1.right_bumper) {Arm_Pos = 1835;}
-            if (gamepad1.left_bumper) {Arm_Pos = 1093;}
+            if (gamepad1.right_bumper) {Arm_Pos = 850; Viper_Pos = 5000; intake_Left.setPower(0);}
+            if (gamepad1.left_bumper) {Arm_Pos = 110; Viper_Pos = 1130; intake_Left.setPower(-1);}
 
             //Arm Increment Control (Mainly to quick tune the arm movement)\\
             if (gamepad1.dpad_up) {Viper_Pos-=Viper_Increment;}
@@ -150,27 +151,18 @@ public class LinearTeleOP extends LinearOpMode {
             if (gamepad1.x && (!X_Pressed)) {
                 X_Pressed = true;
                 //if intake is inactive, activate intake\\
-                if (Intake_Active == 3) {
-                    Intake_Active = 1;
+                if (!Intake_Active) {
+                    Intake_Active = true;
                     intake_Left.setPower(1);
-                    intake_Right.setPower(-1);
                 }
                 //if intake is active, deactivate intake\\
                 else {
-                    if (Intake_Active == 1) {
-                        intake_Left.setPower(0);
-                        intake_Right.setPower(0);
-                        Intake_Active = 2;
-                    }
-                    else {
-                        if (Intake_Active == 2) {
-                            intake_Left.setPower(-1);
-                            intake_Right.setPower(1);
-                            Intake_Active = 3;
-                        }
-                    }}
+                    intake_Left.setPower(-0.5);
+                    Intake_Active = false;
+                }
             }
             if (!gamepad1.x && X_Pressed) {X_Pressed = false;}
+            if (gamepad1.a) {intake_Left.setPower(0);}
 
             //Automatic Hanging
             if (gamepad1.b && !B_Pressed) {
@@ -180,6 +172,9 @@ public class LinearTeleOP extends LinearOpMode {
             if (!gamepad1.b && B_Pressed) {B_Pressed = false;}
 
             //Arm movement pt.2 Moving to setpoint\\
+            if (Arm_Pos > Max_Arm) {Arm_Pos = Max_Arm;}
+            if (Arm_Pos < Min_Arm) {Arm_Pos = Min_Arm;}
+
             if (Hang_Mode) {
                 ((DcMotorEx) armMotor).setVelocity(4200);
                 armMotor.setTargetPosition(0);
