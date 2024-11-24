@@ -77,6 +77,7 @@ public class DummyAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        waitForStart();
         Telemetry.addData("Running" , "NOTHING");
         telemetry.update();
     }

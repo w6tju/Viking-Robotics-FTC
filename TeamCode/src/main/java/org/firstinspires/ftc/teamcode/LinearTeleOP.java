@@ -130,6 +130,7 @@ public class LinearTeleOP extends LinearOpMode {
             if (Hang_Mode) {drive = 1; } else {drive = -gamepad1.left_stick_y*WHEEL_SPEED; }
             double turn  =  gamepad1.right_stick_x*WHEEL_SPEED;
 
+
             leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
             rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
@@ -141,7 +142,7 @@ public class LinearTeleOP extends LinearOpMode {
             if (gamepad1.left_trigger > 0){Arm_Pos -= Arm_increment;}
             if (gamepad1.right_trigger > 0){Arm_Pos += Arm_increment;}
             if (gamepad1.right_bumper) {Arm_Pos = 850; Viper_Pos = 5000; intake_Left.setPower(0);}
-            if (gamepad1.left_bumper) {Arm_Pos = 110; Viper_Pos = 1130; intake_Left.setPower(-1);}
+            if (gamepad1.left_bumper) {Arm_Pos = 130; Viper_Pos = 1130; intake_Left.setPower(-1);}
 
             //Arm Increment Control (Mainly to quick tune the arm movement)\\
             if (gamepad1.dpad_up) {Viper_Pos-=Viper_Increment;}
@@ -165,20 +166,22 @@ public class LinearTeleOP extends LinearOpMode {
             if (gamepad1.a) {intake_Left.setPower(0);}
 
             //Automatic Hanging
-            if (gamepad1.b && !B_Pressed) {
+            /*if (gamepad1.b && !B_Pressed) {
                 B_Pressed = true;
                 Hang_Mode = !Hang_Mode;
             }
-            if (!gamepad1.b && B_Pressed) {B_Pressed = false;}
+            if (!gamepad1.b && B_Pressed) {B_Pressed = false;}*/
 
             //Arm movement pt.2 Moving to setpoint\\
             if (Arm_Pos > Max_Arm) {Arm_Pos = Max_Arm;}
             if (Arm_Pos < Min_Arm) {Arm_Pos = Min_Arm;}
 
-            if (Hang_Mode) {
-                ((DcMotorEx) armMotor).setVelocity(4200);
-                armMotor.setTargetPosition(0);
-                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if (drive != 0 || turn != 0) {
+                if (Arm_Pos < 200) {
+                    ((DcMotorEx) armMotor).setVelocity(2100);
+                    armMotor.setTargetPosition(200);
+                    armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
             }
             else {
                 ((DcMotorEx) armMotor).setVelocity(2100);
@@ -199,12 +202,12 @@ public class LinearTeleOP extends LinearOpMode {
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.addData("Arm",Arm_Pos);
             telemetry.addData("ViperSlide",Viper_Pos);
-            /*if (!Intake_Active) {
+            if (!Intake_Active) {
                telemetry.addData("Intake", "Intaking");
             }
             else {
               telemetry.addData("Intake","Ejecting");
-            }*/
+            }
             telemetry.update();
         }
     }
