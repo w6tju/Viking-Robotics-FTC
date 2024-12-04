@@ -27,21 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OpModes.AUTO;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
@@ -70,15 +68,47 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  */
 
 @Autonomous()
-public class DummyAuto extends LinearOpMode {
-    //Hybrid Telemetry
-    Telemetry Telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-
+public class RoadRunnerAuto extends LinearOpMode {
+    DcMotor armMotor; //motor in arm tower
+    DcMotor viperSlide; //Motor that runs viperslide
+    CRServo intake; //intake motor
+    int Viper_Pos = 0; //Current encoder tick position of the viperslide
+    int Arm_Pos = 0; //arm setpoint
+    SampleTankDrive Controller = new SampleTankDrive(hardwareMap);
 
     @Override
     public void runOpMode() {
+        //import needed components
+        armMotor = hardwareMap.get(DcMotor.class, "armMotor"); //Motor defined as "armMotor" in driver hub
+        intake = hardwareMap.get(CRServo.class, "intake"); //CRservo defined as "intake" in driver hub
+        viperSlide = hardwareMap.get(DcMotor.class,"viperSlide"); //Motor defined as "viperSlide" in driver hub
+
+        TrajectorySequence Move1 = Controller.trajectorySequenceBuilder((new Pose2d(60, -60, Math.toRadians(90))))
+                .splineTo(new Vector2d(0,-30),Math.toRadians(90))
+                .back(30)
+               // .splineTo(new Vector2d(-48,-35),Math.toRadians(90))
+                .build();
+
         waitForStart();
-        Telemetry.addData("Running" , "NOTHING");
-        telemetry.update();
+        Controller.followTrajectorySequenceAsync(Move1);
+        while (opModeIsActive()) {
+            Controller.update();
+
+            ((DcMotorEx) armMotor).setVelocity(2100);
+            armMotor.setTargetPosition(Arm_Pos);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            ((DcMotorEx)viperSlide).setVelocity(2100);
+            viperSlide.setTargetPosition(Viper_Pos);
+            viperSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            //List<Double> WheelVelocities = Controller.getWheelVelocities();
+
+            //telemetry.addData("Motor Velocities", "left (%.2f), right (%.2f)", WheelVelocities.get(0), WheelVelocities.get(1));
+            telemetry.addData("Arm Encoder Position",Arm_Pos);
+            telemetry.addData("Viperslide Encoder Position",Viper_Pos);
+            //telemetry.addData("Estimated Position",Controller.getPoseEstimate());
+            telemetry.update();
+        }
     }
 }
