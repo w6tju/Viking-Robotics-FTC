@@ -31,6 +31,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import static org.firstinspires.ftc.teamcode.TeleOP_Cfg.Arm_increment;
+import static org.firstinspires.ftc.teamcode.TeleOP_Cfg.Viper_Increment;
+import static org.firstinspires.ftc.teamcode.TeleOP_Cfg.WHEEL_SPEED;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -40,6 +44,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -59,14 +64,13 @@ public class LinearTeleOP extends LinearOpMode {
     CRServo intake_Left; //intake motor
     CRServo intake_Right; //intake motor
     int Arm_Pos = 0; //arm setpoint
-    int Arm_increment = 3; //Angle (deg) the arm rotates by
+
     private boolean Intake_Active = false; //if intake is active or not (off by default)
-    double WHEEL_SPEED = 0.7; //Maximum wheel speed (used to slow down the robot)
 
     //Viper Slide configs
     int Viper_maxExtend = 5300; //Maximum encoder tick on the viperslide extension
     int Viper_minExtend = 0; //Minimum encoder tick on the viperslide extension
-    int Viper_Increment = 30; //Increment used by viperslide manual extension
+
     int Viper_Pos = 0; //Current encoder tick position of the viperslide
 
     //Button toggles to prevent internal "button spam"
