@@ -65,21 +65,26 @@ public class MecanumTeleOp extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         
-        //Setup Drive motors\\
+        //region Hardware
         frontLeftDrive  = hardwareMap.get(DcMotor.class, "front_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         rearLeftDrive = hardwareMap.get(DcMotor.class, "rear_left_drive");
         rearRightDrive = hardwareMap.get(DcMotor.class, "rear_right_drive");
+        //endregion
 
+        //region Directions
         frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
         rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         rearRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        //endregion
 
+        //region Zero power
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //endregion
 
         //waits for start button on driver hub\\
         waitForStart();
@@ -89,13 +94,16 @@ public class MecanumTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             WHEEL_SPEED = Range.clip(WHEEL_SPEED,0,1);
 
-            double Drive = -gamepad1.left_stick_x * WHEEL_SPEED;
-            double Drift = -gamepad1.left_stick_y * WHEEL_SPEED;
-            double Turn = gamepad1.right_stick_x * WHEEL_SPEED;
+            //region Inputs
+            double Drive = -gamepad1.left_stick_x * WHEEL_SPEED; // forward input
+            double Drift = -gamepad1.left_stick_y * WHEEL_SPEED; // strafe input
+            double Turn = gamepad1.right_stick_x * WHEEL_SPEED; // steering input
+            //endregion
 
             Mecanum_Movement(Drive,Drift,Turn,gamepad1.dpad_left,gamepad1.dpad_right);
             accessoryController.RunAccessory(gamepad2);
 
+            //region Telemetry
             //Telemetry (shows up on driver hub and FTCDashboard)\\
             Telemetry.addData("Status", "Run Time: " + runtime.toString());
             //telemetry.addData("Wrist",wrist.getPosition());
@@ -112,8 +120,11 @@ public class MecanumTeleOp extends LinearOpMode {
             }
             Telemetry.addData("Arm_Mode:", AccessoryControl.Arm_Mode);
             Telemetry.update();
+            //endregion
         }
     }
+
+    //region Movement
     public void Mecanum_Movement(double Travel,double Strafe,double Rotate, boolean Axial_Rotation, boolean Concerning) {
         //A Drives
         double FL = 0;
@@ -160,4 +171,5 @@ public class MecanumTeleOp extends LinearOpMode {
         rearLeftDrive.setPower(RL);
         rearRightDrive.setPower(RR);
     }
+    //endregion
 }

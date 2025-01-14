@@ -80,21 +80,28 @@ public class Prepare_Specimens extends LinearOpMode {
     @Override
     public void runOpMode() {
         AccessoryControl accessoryController = new AccessoryControl(hardwareMap);
-        //Setup Drive motors\\
+
+        //region Hardware
         frontLeftDrive  = hardwareMap.get(DcMotor.class, "front_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         rearLeftDrive = hardwareMap.get(DcMotor.class, "rear_left_drive");
         rearRightDrive = hardwareMap.get(DcMotor.class, "rear_right_drive");
+        //endregion
 
+        //region Directions
         frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
         rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         rearRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        //endregion
 
+        //region Zero power
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //endregion
+
         waitForStart();
         accessoryController.atStart();
         ElapsedTime FirstMove = new ElapsedTime();

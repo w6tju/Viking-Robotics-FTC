@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.OpModes.AUTO;
 
 import static org.firstinspires.ftc.teamcode.RobotCfg.Arm_Pos;
 import static org.firstinspires.ftc.teamcode.RobotCfg.Viper_Pos;
+import static org.firstinspires.ftc.teamcode.RobotCfg.Presets;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -122,7 +123,7 @@ public class Basic_Auto extends LinearOpMode {
             currentYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             Mecanum_Movement(0,0,0.55,false,false);
         }
-        accessoryControl.Arm_ToPos(RobotCfg.Presets.Basket_High.Arm,RobotCfg.Presets.Basket_High.Viperslide);
+        accessoryControl.Arm_ToPos(RobotCfg.Presets.Basket_High);
         Move_Timer.reset();
         while (Move_Timer.seconds() < 3) {
             Mecanum_Movement(0,0,0,false,false);
@@ -142,7 +143,7 @@ public class Basic_Auto extends LinearOpMode {
             Mecanum_Movement(0,0,0,false,false);
         }
         wrist.setPosition(0);
-        accessoryControl.Arm_ToPos(RobotCfg.Presets.Basket_High.Arm,0);
+        accessoryControl.Arm_ToPos(RobotCfg.Presets.Basket_High);
         Move_Timer.reset();
         while (Move_Timer.seconds() < 3) {
             Mecanum_Movement(0,0,0,false,false);
